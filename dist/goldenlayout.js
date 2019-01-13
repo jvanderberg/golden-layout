@@ -1049,16 +1049,17 @@ lm.utils.copy( lm.LayoutManager.prototype, {
 
 	_$createRootItemAreas: function() {
 		var areaSize = 50;
-		var sides = { y2: 0, x2: 0, y1: 'y2', x1: 'x2' };
-		for( var side in sides ) {
+		var sides = { y2: 'y1', x2: 'x1', y1: 'y2', x1: 'x2' };
+		for (var side in sides) {
 			var area = this.root._$getArea();
 			area.side = side;
-			if( sides [ side ] )
-				area[ side ] = area[ sides [ side ] ] - areaSize;
-			else
-				area[ side ] = areaSize;			
-			area.surface = ( area.x2 - area.x1 ) * ( area.y2 - area.y1 );
-			this._itemAreas.push( area );
+			if (sides[side][1] == '2') {
+				area[side] = area[sides[side]] - areaSize;
+			} else {
+				area[side] = area[sides[side]] + areaSize;
+			}
+			area.surface = (area.x2 - area.x1) * (area.y2 - area.y1);
+			this._itemAreas.push(area);
 		}
 	},
 
@@ -1525,47 +1526,15 @@ lm.utils.copy( lm.LayoutManager.prototype, {
 	}
 })();
 
-lm.config.itemDefaultConfig = {
-	isClosable: true,
-	reorderEnabled: true,
-	title: ''
+lm.errors.ConfigurationError = function( message, node ) {
+	Error.call( this );
+
+	this.name = 'Configuration Error';
+	this.message = message;
+	this.node = node;
 };
-lm.config.defaultConfig = {
-	openPopouts: [],
-	settings: {
-		hasHeaders: true,
-		constrainDragToContainer: true,
-		reorderEnabled: true,
-		selectionEnabled: false,
-		popoutWholeStack: false,
-		blockedPopoutsThrowError: true,
-		closePopoutsOnUnload: true,
-		showPopoutIcon: true,
-		showMaximiseIcon: true,
-		showCloseIcon: true,
-		responsiveMode: 'onload', // Can be onload, always, or none.
-		tabOverlapAllowance: 0, // maximum pixel overlap per tab
-		reorderOnTabMenuClick: true,
-		tabControlOffset: 10
-	},
-	dimensions: {
-		borderWidth: 5,
-		borderGrabWidth: 15,
-		minItemHeight: 10,
-		minItemWidth: 10,
-		headerHeight: 20,
-		dragProxyWidth: 300,
-		dragProxyHeight: 200
-	},
-	labels: {
-		close: 'close',
-		maximise: 'maximise',
-		minimise: 'minimise',
-		popout: 'open in new window',
-		popin: 'pop in',
-		tabDropdown: 'additional tabs'
-	}
-};
+
+lm.errors.ConfigurationError.prototype = new Error();
 
 lm.container.ItemContainer = function( config, parent, layoutManager ) {
 	lm.utils.EventEmitter.call( this );
@@ -1761,6 +1730,48 @@ lm.utils.copy( lm.container.ItemContainer.prototype, {
 		}
 	}
 } );
+
+lm.config.itemDefaultConfig = {
+	isClosable: true,
+	reorderEnabled: true,
+	title: ''
+};
+lm.config.defaultConfig = {
+	openPopouts: [],
+	settings: {
+		hasHeaders: true,
+		constrainDragToContainer: true,
+		reorderEnabled: true,
+		selectionEnabled: false,
+		popoutWholeStack: false,
+		blockedPopoutsThrowError: true,
+		closePopoutsOnUnload: true,
+		showPopoutIcon: true,
+		showMaximiseIcon: true,
+		showCloseIcon: true,
+		responsiveMode: 'onload', // Can be onload, always, or none.
+		tabOverlapAllowance: 0, // maximum pixel overlap per tab
+		reorderOnTabMenuClick: true,
+		tabControlOffset: 10
+	},
+	dimensions: {
+		borderWidth: 5,
+		borderGrabWidth: 15,
+		minItemHeight: 10,
+		minItemWidth: 10,
+		headerHeight: 20,
+		dragProxyWidth: 300,
+		dragProxyHeight: 200
+	},
+	labels: {
+		close: 'close',
+		maximise: 'maximise',
+		minimise: 'minimise',
+		popout: 'open in new window',
+		popin: 'pop in',
+		tabDropdown: 'additional tabs'
+	}
+};
 
 /**
  * Pops a content item out into a new browser window.
@@ -3047,16 +3058,6 @@ lm.utils.copy( lm.controls.TransitionIndicator.prototype, {
 		};
 	}
 } );
-lm.errors.ConfigurationError = function( message, node ) {
-	Error.call( this );
-
-	this.name = 'Configuration Error';
-	this.message = message;
-	this.node = node;
-};
-
-lm.errors.ConfigurationError.prototype = new Error();
-
 /**
  * This is the baseclass that all content items inherit from.
  * Most methods provide a subset of what the sub-classes do.
